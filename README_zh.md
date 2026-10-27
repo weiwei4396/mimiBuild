@@ -3,7 +3,7 @@
 - 我的训练配置
 
 | GPU    | 4 × NVIDIA RTX 3060 |   单卡显存     |      12GB      |
-| :---:       |    :----:   |     :---:     |            |
+| :---:       |    :----:   |     :---:     |        :---:     |
 | Header      | Title       | Here's this   |            |
 | Paragraph   | Text        | And more      |            |
 
