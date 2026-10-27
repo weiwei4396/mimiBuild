@@ -2,8 +2,9 @@
 动手训练大模型，4张RTX 3060，基于minimand跑通预训练、SFT、LoRA、DPO一直到GRPO的关键训练流程。
 - 我的训练配置
 
-| :---:       |    :----:   |     :---:     |        :---:     |
+
 | GPU    | 4 × NVIDIA RTX 3060 |   单卡显存     |      12GB      |
+| ::       |    ::   |     ::     |        ::     |
 | Header      | Title       | Here's this   |            |
 | Paragraph   | Text        | And more      |            |
 
