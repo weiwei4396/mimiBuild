@@ -2,11 +2,10 @@
 动手训练大模型，4张RTX 3060，基于minimand跑通预训练、SFT、LoRA、DPO一直到GRPO的关键训练流程。
 - 我的训练配置
 
-
 | GPU    | 4 × NVIDIA RTX 3060 |   单卡显存     |      12GB      |
 | :-:       |    :-:   |     :-:     |        :-:     |
-| Header      | Title       | Here's this   |            |
-| Paragraph   | Text        | And more      |            |
+| PyTorch   |    2.6.0+cu124    | PyTorch CUDA  |    12.4     |
+| Python 版本   | 3.10.0  | NVIDIA 驱动版本   |    595.84    |
 
 
 ## 1️⃣ 搭建环境
@@ -24,7 +23,9 @@ git rev-parse HEAD
 ## 2️⃣ 预训练 Pretrain
 
 
-
+|实验|模型参数量|hidden_size|num_hidden_layers|use_moe|from_weight|数据集|训练样本数|max_seq_len|world_size|每卡batch_size|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|单卡Pretrain|63.91M|768|8|False|None|pretrain_t2t_mini.jsonl|1270238|256|4|2|
 
 
 
