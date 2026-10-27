@@ -22,20 +22,15 @@ git rev-parse HEAD
 
 ## 2️⃣ 预训练 Pretrain
 
+模型、数据与训练配置
+|实验|模型参数量|hidden_size|num_hidden_layers|use_moe|from_weight|数据集|训练样本数|max_seq_len|world_size|每卡batch_size|accumulation_steps|effective_batch_size|dtype|Optimizer|Learning Rate|学习率调度|Epoch|Seed|grad_clip|num_workers|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|单卡Pretrain|63.91M|768|8|False|None|pretrain_t2t_mini.jsonl|1270238|256|4|2|4|32|混合精度|AdamW|5e-4|Cosine Decay|1|42|1.0|2|
 
-|实验|模型参数量|hidden_size|num_hidden_layers|use_moe|from_weight|数据集|训练样本数|max_seq_len|world_size|每卡batch_size|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|单卡Pretrain|63.91M|768|8|False|None|pretrain_t2t_mini.jsonl|1270238|256|4|2|
-
-
-
-实验配置
+训练过程与性能
 
 
-
-
-
-训练结果
+模型评估
 
 
 
