@@ -33,6 +33,7 @@ git rev-parse HEAD
 |单卡Pretrain|7.5224|1.6552|每个epoch更新4,962次|13,889.16 + 15,062.45|6.12 GiB + 6.11 GiB|317.87 min + 293.11 min|
 
 > 有效token也就是参与Loss计算的token。
+
 > Allocated (峰值显存) 是 PyTorch 的 Tensor 实际占用的显存；Reserved (显存缓存分配器峰值) 是 PyTorch 显存缓存分配器从 CUDA 获取并管理的显存。
 
 - 实验环境：单张 NVIDIA RTX 3060 12 GiB，使用 MiniMind 的 Pretrain 训练脚本，对 pretrain_t2t_mini.jsonl 中的 1,270,238 条数据训练 2 个 Epoch。
