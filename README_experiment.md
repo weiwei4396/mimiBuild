@@ -31,12 +31,17 @@ git rev-parse HEAD
 |实验|首次Train Loss|最后Train Loss|Optimizer 更新次数|平均有效 Tokens/s（全局）|单卡峰值显存|总训练时间|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |单卡Pretrain|7.5224|1.6552|每个epoch更新4,962次|13,889.16 + 15,062.45|6.12 GiB + 6.11 GiB|317.87 min + 293.11 min|
-- 实验环境：单张NVIDIA RTX 3060 12 GiB，使用MiniMind的Pretrain训练脚本，对pretrain_t2t_mini.jsonl中的1,270,238条数据训练2个Epoch。
-- 训练规模：每个Epoch处理264,899,312个有效监督Token、431,880,920个输入位置，并执行4,962次优化器更新调用。
-- 训练性能：Epoch 1的有效Token吞吐量为13,889.16 tokens/s，训练耗时317.87分钟；Epoch 2吞吐量提高至15,062.45 tokens/s，耗时下降至293.11分钟。相较于Epoch 1，第二轮吞吐量提升约8.45%，训练时间缩短约7.79%。
-- 数据利用情况：有效监督Token占输入位置的约61.34%。结合当前PretrainDataset的固定长度Padding和Shift机制，推算约38.37%的输入位置为Padding，说明后续可以探索减少无效填充的训练数据组织方式。
-- 显存表现：两轮PyTorch Tensor峰值显存分别为6.12 GiB和6.11 GiB，缓存分配器峰值均为6.47 GiB，未发现明显的跨Epoch显存峰值增长。
-- 实验结论：该实验完成了大规模单卡预训练性能基线的采集。两个Epoch的统计结果一致性较好，第二轮训练吞吐有所提升，显存表现稳定。
+
+> 有效token也就是参与Loss计算的token。
+> Allocated (峰值显存) 是 PyTorch 的 Tensor 实际占用的显存；Reserved (显存缓存分配器峰值) 是 PyTorch 显存缓存分配器从 CUDA 获取并管理的显存。
+
+- 实验环境：单张 NVIDIA RTX 3060 12 GiB，使用 MiniMind 的 Pretrain 训练脚本，对 pretrain_t2t_mini.jsonl 中的 1,270,238 条数据训练 2 个 Epoch。
+- 训练规模：每个 Epoch 处理 264,899,312 个有效监督Token、431,880,920 个输入位置，并执行 4,962 次优化器更新调用。
+- 训练性能：Epoch 1 的有效 Token 吞吐量为 13,889.16 tokens/s，训练耗时 317.87 分钟；Epoch 2 吞吐量提高至 15,062.45 tokens/s，耗时下降至 293.11 分钟。相较于 Epoch 1，第二轮吞吐量提升约 8.45%，训练时间缩短约 7.79%。
+- 数据利用情况：有效监督 Token 占输入位置的约 61.34%。结合当前 PretrainDataset 的固定长度 Padding 和 Shift 机制，推算约 38.37% 的输入位置为 Padding，说明后续可以探索减少无效填充的训练数据组织方式。
+- 显存表现：两轮 PyTorch Tensor 峰值显存分别为 6.12 GiB 和 6.11 GiB，缓存分配器峰值均为 6.47 GiB，未发现明显的跨 Epoch 显存峰值增长。
+- 实验结论：该实验完成了大规模单卡预训练性能基线的采集。两个 Epoch 的统计结果一致性较好，第二轮训练吞吐有所提升，显存表现稳定。
+
 
 
 
