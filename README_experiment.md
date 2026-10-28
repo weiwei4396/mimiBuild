@@ -28,23 +28,31 @@ git rev-parse HEAD
 |单卡Pretrain|63.91M|768|8|False|None|pretrain_t2t_mini.jsonl|1270238|256|4|2|4|32|混合精度|AdamW|5e-4|Cosine Decay|1|42|1.0|2|
 
 训练过程与性能
-
+|实验|首次Train Loss|最后Train Loss|Optimizer 更新次数|平均有效 Tokens/s（全局）|总训练时间|单卡峰值显存|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|单卡Pretrain|   |   |   |   |   |   |
 
 模型评估
 
 
 
-
 ## 3️⃣ 监督微调 SFT
-
-
 
 实验配置
 
 
-
-
-
 训练结果
+
+
+
+
+
+## 3️⃣ 直接偏好优化 DPO
+
+
+
+
+
+
 
 
