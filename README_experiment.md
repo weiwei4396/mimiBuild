@@ -22,19 +22,28 @@ git rev-parse HEAD
 
 ## 2️⃣ 预训练 Pretrain
 
-模型、数据与训练配置
+### 模型、数据与训练配置
+
 |实验|模型参数量|hidden_size|num_hidden_layers|use_moe|from_weight|数据集|训练样本数|max_seq_len|world_size|每卡batch_size|accumulation_steps|effective_batch_size(执行优化器参数更新时的batch size)|dtype|Optimizer|Learning Rate|学习率调度|Epoch|Seed|grad_clip|num_workers|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|单卡Pretrain|63.91M|768|8|False|None|pretrain_t2t_mini.jsonl|1,270,238|340|1|32|8|32*8=256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|8|
+|单卡Pretrain|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|1|32|8|32*8=256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|8|
+|四卡DDP|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|4|32|2|32*2*4=256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|2|
 
 > --num_workers是PyTorch DataLoader的参数，表示使用多少个子进程并行加载和处理训练数据。在 DDP 多卡训练中，每张 GPU 对应一个训练进程，而每个训练进程都会创建自己的 DataLoader。
 
-> world_size 严格来说表示训练进程数量，不是 GPU 数量。只是我们平常使用 PyTorch DDP 时，通常让一个训练进程负责一张 GPU，所以两者数量相等。
+> --world_size严格来说表示训练进程数量，不是 GPU 数量。只是我们平常使用 PyTorch DDP 时，通常让一个训练进程负责一张 GPU，所以两者数量相等。
 
-训练过程与性能
+> Effective Batch Size = 每卡 Batch Size × Accumulation Steps × World Size
+
+>  DDP 不是把四张 GPU 的 Loss 简单加起来，而是让四张 GPU 分别计算 Loss 和梯度，再同步平均梯度，最后共同更新同一个模型。
+>  不同数据 → 各自计算 Loss → 各自反向传播 → DDP 平均梯度 → 各自执行相同的参数更新
+
+### 训练过程与性能
+
 |实验|首次Train Loss|最后Train Loss|Optimizer 更新次数|平均有效 Tokens/s（全局）|单卡峰值显存|总训练时间|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|单卡Pretrain|7.5224|1.6552|每个epoch更新4,962次|13,889.16 + 15,062.45|6.12 GiB + 6.11 GiB|317.87 min + 293.11 min|
+|单卡Pretrain|7.5224|1.6552|每个epoch更新4,962次|13,889.16 + 15,062.45|6.12 GiB + 6.11 GiB|317.87 min + 293.11 min，总共10.18个小时|
+|四卡DDP| | | | | | |
 
 > 有效token也就是参与Loss计算的token。
 
@@ -42,6 +51,7 @@ git rev-parse HEAD
 
 > Allocated (峰值显存) 是 PyTorch 的 Tensor 实际占用的显存；Reserved (显存缓存分配器峰值) 是 PyTorch 显存缓存分配器从 CUDA 获取并管理的显存。
 
+单卡pretrain：
 - 实验环境：单张 NVIDIA RTX 3060 12 GiB，使用 MiniMind 的 Pretrain 训练脚本，对 pretrain_t2t_mini.jsonl 中的 1,270,238 条数据训练 2 个 Epoch。
 - 训练规模：每个 Epoch 处理 264,899,312 个有效监督Token、431,880,920 个输入位置，并执行 4,962 次优化器更新调用。
 - 训练性能：Epoch 1 的有效 Token 吞吐量为 13,889.16 tokens/s，训练耗时 317.87 分钟；Epoch 2 吞吐量提高至 15,062.45 tokens/s，耗时下降至 293.11 分钟。相较于 Epoch 1，第二轮吞吐量提升约 8.45%，训练时间缩短约 7.79%。
@@ -52,16 +62,20 @@ git rev-parse HEAD
 
 
 
-模型评估
+### 模型评估
 
 
 
 ## 3️⃣ 监督微调 SFT
 
+
+
 实验配置
 
 
+
 训练结果
+
 
 
 
