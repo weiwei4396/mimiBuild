@@ -1,0 +1,38 @@
+
+
+images/
+# ===== Training datasets =====
+*.jsonl
+*.jsonl.gz
+data/
+
+# ===== Checkpoints and model weights =====
+checkpoints/
+checkpoint/
+checkpoint-*/
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+
+# ===== Training outputs =====
+outputs/
+runs/
+logs/
+wandb/
+
+# ===== Python cache =====
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# ===== Environment and secrets =====
+.env
+.env.*
+!.env.example
+
+# ===== System files =====
+.DS_Store
+.vscode/
