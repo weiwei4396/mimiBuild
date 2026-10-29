@@ -26,8 +26,8 @@ git rev-parse HEAD
 
 |实验|模型参数量|hidden_size|num_hidden_layers|use_moe|from_weight|数据集|训练样本数|max_seq_len|world_size|每卡batch_size|accumulation_steps|effective_batch_size(执行优化器参数更新时的batch size)|dtype|Optimizer|Learning Rate|学习率调度|Epoch|Seed|grad_clip|num_workers|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|单卡Pretrain|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|1|32|8|32*8=256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|8|
-|四卡DDP|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|4|32|2|32*2*4=256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|2|
+|单卡Pretrain|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|1|32|8|32 * 8 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|8|
+|四卡DDP|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|4|32|2|32 * 2 * 4 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|2|
 
 > --num_workers是PyTorch DataLoader的参数，表示使用多少个子进程并行加载和处理训练数据。在 DDP 多卡训练中，每张 GPU 对应一个训练进程，而每个训练进程都会创建自己的 DataLoader。
 
@@ -36,7 +36,7 @@ git rev-parse HEAD
 > Effective Batch Size = 每卡 Batch Size × Accumulation Steps × World Size
 
 >  DDP 不是把四张 GPU 的 Loss 简单加起来，而是让四张 GPU 分别计算 Loss 和梯度，再同步平均梯度，最后共同更新同一个模型。
->  不同数据 → 各自计算 Loss → 各自反向传播 → DDP 平均梯度 → 各自执行相同的参数更新
+>  不同数据 → 各自计算 Loss → 各自反向传播 → DDP 平均梯度 → 各自执行相同的参数更新。
 
 ### 训练过程与性能
 
