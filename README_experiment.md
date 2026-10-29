@@ -26,8 +26,8 @@ git rev-parse HEAD
 
 |实验|模型参数量|hidden_size|num_hidden_layers|use_moe|from_weight|数据集|训练样本数|max_seq_len|world_size|每卡batch_size|accumulation_steps|effective_batch_size(执行优化器参数更新时的batch size)|dtype|Optimizer|Learning Rate|学习率调度|Epoch|Seed|grad_clip|num_workers|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|单卡Pretrain|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|1|32|8|32 * 8 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|8|
-|四卡DDP|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|4|32|2|32 * 2 * 4 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|2|
+|单卡Pretrain (PT-01)|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|1|32|8|32 * 8 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|8|
+|四卡DDP (PT-02)|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|4|32|2|32 * 2 * 4 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|2|
 
 > --num_workers是PyTorch DataLoader的参数，表示使用多少个子进程并行加载和处理训练数据。在 DDP 多卡训练中，每张 GPU 对应一个训练进程，而每个训练进程都会创建自己的 DataLoader。
 
@@ -42,8 +42,8 @@ git rev-parse HEAD
 
 |实验|首次Train Loss|最后Train Loss|Optimizer 更新次数|平均有效 Tokens/s（全局）|单卡峰值显存|总训练时间|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|单卡Pretrain|7.5224|1.6552|每个epoch更新4,962次|13,889.16 / 15,062.45|6.12 GiB / 6.11 GiB|317.87 min + 293.11 min，总共10.18个小时|
-|四卡DDP| | | | | | |
+|单卡Pretrain (PT-01)|7.5224|1.6552|每个epoch更新4,962次|13,889.16 / 15,062.45|6.12 GiB / 6.11 GiB|317.87 min + 293.11 min，总共10.18个小时|
+|四卡DDP (PT-02)|6.6322| |每个epoch更新4,962次| | | |
 
 > 有效token也就是参与Loss计算的token。
 
