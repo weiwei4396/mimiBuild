@@ -24,10 +24,10 @@ git rev-parse HEAD
 
 ### 模型、数据与训练配置
 
-|实验|模型参数量|hidden_size|num_hidden_layers|use_moe|from_weight|数据集|训练样本数|max_seq_len|world_size|每卡batch_size|accumulation_steps|effective_batch_size(执行优化器参数更新时的batch size)|dtype|Optimizer|Learning Rate|学习率调度|Epoch|Seed|grad_clip|num_workers|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|单卡Pretrain (PT-01)|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|1|32|8|32 * 8 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|8|
-|四卡DDP (PT-02)|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|4|32|2|32 * 2 * 4 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|2|
+|实验|模型参数量|hidden_size|num_hidden_layers|use_moe|from_weight|数据集|训练样本数|max_seq_len|world_size|每进程batch数/Epoch|每卡batch_size|accumulation_steps|effective_batch_size (执行优化器参数更新时的batch size)|dtype|Optimizer|Learning Rate|学习率调度|Epoch|Seed|grad_clip|num_workers|总 DataLoader Workers|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|单卡Pretrain (PT-01)|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|1|39,695|32|8|32 * 8 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|8|8|
+|四卡DDP (PT-02)|63.91M|768|8|False|none|pretrain_t2t_mini.jsonl|1,270,238|340|4|9,924|32|2|32 * 2 * 4 = 256 ([1,270,238/256]=4,962)|BF16混合精度|AdamW|5e-4|Cosine Decay|2|42|1.0|2|8|
 
 > --num_workers是PyTorch DataLoader的参数，表示使用多少个子进程并行加载和处理训练数据。在 DDP 多卡训练中，每张 GPU 对应一个训练进程，而每个训练进程都会创建自己的 DataLoader。
 
@@ -40,10 +40,10 @@ git rev-parse HEAD
 
 ### 训练过程与性能
 
-|实验|首次Train Loss|最后Train Loss|Optimizer 更新次数|平均有效 Tokens/s（全局）|单卡峰值显存|总训练时间|
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|单卡Pretrain (PT-01)|7.5224|1.6552|每个epoch更新4,962次|13,889.16 / 15,062.45|6.12 GiB / 6.11 GiB|317.87 min + 293.11 min，总共10.18个小时|
-|四卡DDP (PT-02)|6.6322| |每个epoch更新4,962次| | | |
+|实验|首次Train Loss|最后Train Loss|Optimizer 更新次数|平均有效 Tokens/s (全局)|单卡峰值显存|总训练时间|有效token (四卡DistributedSampler采用补齐策略)|
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|单卡Pretrain (PT-01)|7.5224|1.6552|每个epoch更新4,962次|13,889.16 / 15,062.45|6.12 GiB / 6.11 GiB|317.87 min + 293.11 min，总共10.18个小时|264,899,312|
+|四卡DDP (PT-02)|6.6322|1.8267|每个epoch更新4,962次|每张卡6.35 GiB / 6.35 GiB| |78.66 min + 79.22 min，总共2.63个小时|264,899,848 / 264,899,886|
 
 > 有效token也就是参与Loss计算的token。
 
@@ -59,7 +59,12 @@ git rev-parse HEAD
 - 显存表现：两轮 PyTorch Tensor 峰值显存分别为 6.12 GiB 和 6.11 GiB，缓存分配器峰值均为 6.47 GiB，未发现明显的跨 Epoch 显存峰值增长。
 - 实验结论：该实验完成了大规模单卡预训练性能基线的采集。两个 Epoch 的统计结果一致性较好，第二轮训练吞吐有所提升，显存表现稳定。
 
-
+四卡DDP：
+- 实验环境：采用四张 RTX 3060 12GB，通过 PyTorch DistributedDataParallel 对 MiniMind 64M 模型进行分布式预训练。
+- 训练规模：保持名义全局有效 Batch Size 为 256，通过将梯度累积步数从 8 调整为 2，使用数据并行提升全局训练吞吐量。
+- 训练性能：Epoch 1 的全局有效吞吐量达到 56,131.01 Tokens/s，训练耗时 78.66 分钟；Epoch 2 的全局有效吞吐量为 55,733.50 Tokens/s，训练耗时 79.22 分钟。相较单卡两轮总训练时间 610.98 分钟，四卡累计训练耗时约 157.87 分钟，实际实现约 3.87 倍加速，并行效率约 96.75%，训练墙钟时间缩短约 74.16%。
+- 显存表现：四卡每 GPU 峰值 Tensor 显存均为 6.35 GiB，相较单卡约增加 0.23～0.24 GiB，符合 DDP 模型复制及额外通信状态可能带来的开销特征。
+-  实验结论：在名义全局有效 Batch Size 保持 256 的条件下，四卡 DDP 实现约 3.87× 的训练加速。四卡整体训练耗时缩短约 74.16%，并行效率约为 96.75%。四卡每 GPU 峰值显存约 6.35 GiB，仍保持在 12GB 设备的容量范围内。两组训练均完成预定的 2 个 Epoch 和 9,924 次优化器更新调用。
 
 
 ### 模型评估
