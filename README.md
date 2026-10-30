@@ -1,8 +1,10 @@
 <div align="center">
+
 # mimiBuild: Training a large language model from scratch
 </div>
 
 <div align="center">
+
 [项目实战记录](https://github.com/weiwei4396/mimiBuild/blob/main/README_experiment.md) | [项目中文笔记记录](https://ycnaiekpok4f.feishu.cn/wiki/Q36ew8rLCiVKh9kRf2YcLscZnnb?from=from_copylink) | [大模型相关笔记](https://ycnaiekpok4f.feishu.cn/wiki/Sm4FwdOvsiFegKkUGFhcZfmwnBd?from=from_copylink)
 </div>
 
